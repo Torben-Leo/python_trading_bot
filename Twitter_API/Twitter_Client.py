@@ -4,8 +4,9 @@ import pandas as pd
 import tweepy
 from tweepy import OAuthHandler
 from textblob import TextBlob
+from pycaret.classification import *
 
-
+# Todo Should sentimnet scores be weighted based on number of followers?
 class TwitterClient:
 
     def __init__(self, consumer_key, consumer_secret, access_token_key, access_token_secret):
@@ -46,7 +47,7 @@ class TwitterClient:
         else:
             return -1
 
-    def get_tweets(self, query, count=10):
+    def get_tweets(self, query, count):
         '''
         Main function to fetch tweets and parse them.
         '''
@@ -54,7 +55,7 @@ class TwitterClient:
         tweets = []
         try:
             # call twitter api to fetch tweets
-            fetched_tweets = self.api.search_tweets(q=query, count=count)
+            fetched_tweets = self.api.search_30_day('development', query=query, maxResults= count)
 
             # parsing tweets one by one
             for tweet in fetched_tweets:
@@ -73,7 +74,10 @@ class TwitterClient:
                 parsed_tweet['tweet_id'] = tweet.id
                 #saving the user name
                 parsed_tweet['user_name'] = tweet.user.name
-
+                # saving the user name
+                parsed_tweet['retweets'] = tweet.retweet_count
+                # saving the user name
+                parsed_tweet['number_followers'] = tweet.user.followers_count
 
                 # appending parsed tweet to tweets list
                 if tweet.retweet_count > 0:
@@ -96,7 +100,7 @@ api = TwitterClient('AdjvBaBpABMWXxeuni1LHtWHR', 'TbfZfEP7KrCPpymrRTSfrz88cwcvHE
                     '1326610440189784066-UwQoZIIvkOdhYdx74WvoZy8xh9htev',
                     'hQJ0iCIjUXeQ3t54iCFMailuDeyw8a1l5ey9BE0N4ccl3')
  # calling function to get tweets
-tweets = api.get_tweets(query='Bitcoin', count=10)
+tweets = api.get_tweets(query='Bitcoin -RT', count=100)
 print(tweets)
 
 

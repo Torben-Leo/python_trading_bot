@@ -58,6 +58,7 @@ reddit = reddit_api_connection.RedditClient(client_id='6eThO9Cr1LNuhduKYWH-Fw',
                                             client_secret='V4XQ33LOktsRDJ9dsg-ZL6AgJVk7aQ',
                                             user_agent='tom_forest')
 reddit.get_headlines('bitcoin')
+print(reddit.headlines)
 sa = SentimentAnalyser(reddit_client= reddit)
 sa.get_polscore()
 sa.show_positive_headlines()
