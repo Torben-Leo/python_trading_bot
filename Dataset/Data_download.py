@@ -1,12 +1,11 @@
-import requests
-import json
-import os
-from io import StringIO
 import pandas as pd
-import glob
 import datetime
-from pathlib import Path
-#?raw=true
+
+
+pd.options.display.width= None
+pd.options.display.max_columns= None
+pd.set_option('display.max_rows', 3000)
+pd.set_option('display.max_columns', 3000)
 
 #todo: Data cleaning, delete cc's without values in the sentiment columns, build first regression models,
 # is sentimenet score allone enough as predictor variable
@@ -23,7 +22,14 @@ def git_download(path):
         return
     # handle nan data
     else:
-        df.fillna(method = 'ffill')
+        df.score.fillna(method = 'ffill', inplace=True)
+    # calculate return per day
+    df['ret'] = df.close.pct_change()
+    df.ret.fillna(0, inplace = True)
+    # create decision variable 1 for positive return and 0 for negative returns of the next day
+    df['ret_1'] = (df['ret'] > 0).astype(int)
+    df['vola'] = (df.ret.rolling(window=30).std())*(30)**1/2
+
     return df
 
 
@@ -33,11 +39,4 @@ def urls_to_df_from_url(urls):
         content.append(git_download('https://github.com/Qokka/crypto-sentiment-data/blob/ee96212e68e1796b8bb14cdae7e7bacf6d78eed0/2019-daily-sentiment-price/' + url + '_reddit.csv?raw=true'))
     df = pd.concat(content, sort=False)
     return df
-
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
-        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-df = urls_to_df_from_url(urls)
-print(df.head())
-print(df.info())
-print(df.describe())
 
