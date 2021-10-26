@@ -10,17 +10,17 @@ from statsmodels.formula.api import ols, logit
 
 def log_reg(df):
     # check for distribution of target variable:
-    print(sentiment_df.ret_1.value_counts() / len(sentiment_df.ret_1))
+    print(sentiment_reddit_df.ret_1.value_counts() / len(sentiment_reddit_df.ret_1))
     # make train- test split based on date, not random
-    model_data = df[df.index < "2019-10-01"]
-    backtesting_data = df[df.index >= "2019-10-01"]
+    model_data = df[df.start < "2019-10-01"]
+    backtesting_data = df[df.start >= "2019-10-01"]
 
     # Split the data into explanatory and dependable variables for test and train datasets
-    X = model_data[['score', 'volumeUSD', 'vola']]
-    y = model_data['ret_1']
+    X = model_data[['average', 'score', 'ret']]
+    y = model_data['return']
 
-    X_test = backtesting_data[['score', 'volumeUSD', 'vola']]
-    y_test = backtesting_data['ret_1']
+    X_test = backtesting_data[['average', 'score', 'ret']]
+    y_test = backtesting_data['return']
     regr = LogisticRegression()
     regr.fit(X, y)
     y_pred = regr.predict(X_test)
@@ -35,8 +35,11 @@ def log_reg(df):
     print(result.summary2())
 
 
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+urls_reddit = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
         'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-sentiment_df = urls_to_df_from_url(urls).dropna()
-print(sentiment_df.describe())
-log_reg(sentiment_df)
+urls_telegram = ['ada', 'algo', 'atom', 'dnt', 'eos','knc',
+        'loom', 'mana', 'trx', 'xem', 'xrp', 'xtz']
+sentiment_reddit_df = urls_to_df_from_url(urls_reddit, 'reddit')
+sentiment_telegram = urls_to_df_from_url(urls_telegram, 'telegram')
+print(sentiment_reddit_df.describe())
+log_reg(sentiment_reddit_df)
