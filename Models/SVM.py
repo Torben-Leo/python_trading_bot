@@ -4,9 +4,8 @@ from sklearn import preprocessing as prep
 from Dataset.Data_download import urls_to_df_from_url
 
 def svm(data):
-    split = int(len(data) * 0.8)
-    train = data.iloc[:split].copy()
-    test = data.iloc[split:].copy()
+    train = data[data.start < "2019-10-01"]
+    test = data[data.start >= "2019-10-01"]
     train_x = train.filter(['return']).to_numpy()
     test_x = test.filter(['return']).to_numpy()
     train_y = train[['average', 'score', 'ret']].to_numpy()
