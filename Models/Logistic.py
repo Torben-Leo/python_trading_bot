@@ -3,7 +3,8 @@ from sklearn.linear_model import LogisticRegression
 from Dataset.Data_download import urls_to_df_from_url
 import pandas as pd
 import statsmodels.api as sm
-from statsmodels.formula.api import ols, logit
+import numpy as np
+from statsmodels.discrete.conditional_models import ConditionalLogit
 
 
 
@@ -15,27 +16,29 @@ def log_reg(df):
     model_data = df[df.start < "2019-10-01"]
     backtesting_data = df[df.start >= "2019-10-01"]
 
+    print(model_data.coin.value_counts())
     # Split the data into explanatory and dependable variables for test and train datasets
-    X = model_data[['average', 'score', 'ret']]
+    X = model_data[['average', 'ret']]
     y = model_data['return']
 
-    X_test = backtesting_data[['average', 'score', 'ret']]
+    X_test = backtesting_data[['average', 'ret']]
     y_test = backtesting_data['return']
     regr = LogisticRegression()
+
     regr.fit(X, y)
     y_pred = regr.predict(X_test)
     print(pd.DataFrame([pd.DataFrame(y_pred).value_counts(), pd.DataFrame(y_test).value_counts()],
                  index=['Prediction', 'Y_test']).T)
-    logit_model = sm.Logit(y, X.astype(float), missing='drop')
+    logit_model = ConditionalLogit(y.to_numpy(), X.astype(float).to_numpy(), groups = model_data['coin'].to_numpy())
 
     # fit logit model into the data
     result = logit_model.fit()
 
     # summarize the logit model
-    print(result.summary2())
+    print(result.summary())
 
 
-urls_reddit = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+urls_reddit = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'knc',
         'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
 urls_telegram = ['ada', 'algo', 'atom', 'dnt', 'eos','knc',
         'loom', 'mana', 'trx', 'xem', 'xrp', 'xtz']

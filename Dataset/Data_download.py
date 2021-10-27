@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import datetime
 
@@ -28,7 +29,7 @@ def git_download(path, name):
     df['ret'] = df.close.pct_change()
     df.ret.fillna(0, inplace=True)
     df['ret_1'] = df.ret.shift(-1)
-    df.ret.fillna(0, inplace=True)
+    df.ret_1.fillna(0, inplace=True)
     # create decision variable 1 for positive return and 0 for negative returns of the next day
     df['return'] = (df['ret_1'] > 0).astype(int)
     df['vola'] = (df.ret.rolling(window=30).std())*(30)**1/2
