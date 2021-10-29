@@ -1,3 +1,4 @@
+import pandas as pd
 from sklearn. tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
@@ -53,7 +54,5 @@ def random_forest(df):
 
 
 
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
-        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-sentiment_df = urls_to_df_from_url(urls, 'reddit').dropna()
+sentiment_df = pd.read_csv()
 random_forest(sentiment_df)

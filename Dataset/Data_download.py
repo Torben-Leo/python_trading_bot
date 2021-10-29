@@ -8,7 +8,7 @@ pd.options.display.max_columns= None
 pd.set_option('display.max_rows', 3000)
 pd.set_option('display.max_columns', 3000)
 
-#todo: Data cleaning, delete cc's without values in the sentiment columns, build first regression models,
+# todo: Data cleaning, delete cc's without values in the sentiment columns, build first regression models,
 # is sentimenet score allone enough as predictor variable
 
 
@@ -52,3 +52,11 @@ def urls_to_df_from_url(urls, platform):
     df = pd.concat(content, sort=False)
     return df
 
+urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
+urls_telegram = ['ada', 'algo', 'atom', 'dnt', 'eos','knc', 'loom', 'mana', 'trx', 'xem', 'xrp', 'xtz']
+df_reddit = urls_to_df_from_url(urls, 'reddit')
+df_telegram = urls_to_df_from_url(urls_telegram, 'telegram')
+
+df_reddit.to_csv('reddit.csv')
+df_telegram.to_csv('telegram.csv')

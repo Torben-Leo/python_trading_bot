@@ -19,7 +19,7 @@ def pred(data, variables):
     prediction_backtest = model.predict(backtesting_data[variables])
     # add the predictions to the original data and keep predictions, date & RP_ENTITY_ID as columns
     backtesting_data['Prediction_News'] = prediction_backtest
-    backtesting_prediction = backtesting_data[['start', 'coin', 'Prediction_News', 'open', 'ret']]
+    backtesting_prediction = backtesting_data[['start', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average']]
     print(accuracy_score(backtesting_data["return"], prediction_backtest))
     backtesting_prediction.Prediction_News.value_counts()
     print(confusion_matrix(backtesting_data["return"], prediction_backtest))
@@ -80,9 +80,8 @@ def results(data):
     plt.show()
 
 
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
-        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-sentiment_df = urls_to_df_from_url(urls, 'reddit').dropna()
+
+sentiment_df = pd.read_csv('reddit.csv')
 predictions = pred(sentiment_df, ['score', 'average', 'ret'])
 sma(predictions)
 sentiment_strategy(predictions)

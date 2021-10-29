@@ -1,3 +1,4 @@
+import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn import preprocessing as prep
@@ -22,7 +23,6 @@ def svm(data):
         print('{:>8s} | {:8.3f}'.format(kernel, accuracy_score(test_x, model.predict(test_y))))
 
 
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
-        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-sentiment_df = urls_to_df_from_url(urls, 'reddit').dropna()
+
+sentiment_df = pd.read_csv()
 svm(sentiment_df)

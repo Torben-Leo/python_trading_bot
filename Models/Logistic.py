@@ -38,11 +38,10 @@ def log_reg(df):
     print(result.summary())
 
 
-urls_reddit = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'knc',
-        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-urls_telegram = ['ada', 'algo', 'atom', 'dnt', 'eos','knc',
-        'loom', 'mana', 'trx', 'xem', 'xrp', 'xtz']
-sentiment_reddit_df = urls_to_df_from_url(urls_reddit, 'reddit')
-sentiment_telegram = urls_to_df_from_url(urls_telegram, 'telegram')
+
+
+
+sentiment_reddit_df = pd.read_csv('reddit.csv')
+sentiment_telegram = pd.read_csv('telegram.csv')
 print(sentiment_reddit_df.describe())
 log_reg(sentiment_reddit_df)
