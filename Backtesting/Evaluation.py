@@ -120,6 +120,9 @@ def crypto_index(ticker):
 def comparison(data, comparable):
     # calculate the excess return in comparison to sp500 per day
     data.rename(columns = {'start':'Date'}, inplace=True)
+    time = lambda x: x + datetime.timedelta(hours=-8)
+    data.Date = pd.to_datetime(data.Date)
+    data.Date = data.Date.apply(time)
     strategy1_return = data[data["Strategy1"] != 0].groupby('Date')[
         'Strategy1'].mean()
     strategy1_return = pd.DataFrame(strategy1_return).reset_index()
@@ -133,17 +136,12 @@ def comparison(data, comparable):
     dict4 = {'Date': excess.Date, 'Cum_Ret_Excess': excess["excess_return"].cumsum()}
     dict5 = {'Cum_Ret_BuyAll': data.groupby(['Date'])['ret'].mean().cumsum()}
 
-    time = lambda x: x + datetime.timedelta(hours = -8)
+
     df1 = pd.DataFrame.from_dict(dict1).reset_index()
-    df1.info()
-    df1.Date = df1.Date.apply(time)
-    df1.info()
     df2 = pd.DataFrame.from_dict(dict2)
     df3 = pd.DataFrame.from_dict(dict3).reset_index()
-    df3.Date = df3.Date.apply(time)
     df4 = pd.DataFrame.from_dict(dict4)
     df5 = pd.DataFrame.from_dict(dict5).reset_index()
-    df5.Date = df5.Date.apply(time)
 
     plot_data = df2.merge(df1, on='Date', how='left')
     plot_data =  plot_data.merge(df3, on='Date').merge(df4, on='Date', how='left').merge(
@@ -172,6 +170,49 @@ def comparison(data, comparable):
     fig.show()
     plt.show()
 
+def facts(data):
+    # calculate the excess return in comparison to sp500 per day
+    data.rename(columns={'start': 'Date'}, inplace=True)
+    strategy1_return = data[data["Strategy1"] != 0].groupby('Date')[
+        'Strategy1'].mean()
+    strategy1_return = pd.DataFrame(strategy1_return).reset_index()
+    excess = strategy1_return.merge(bitcoin[["Date", "ret"]], on='Date', how="right")
+    excess = excess.fillna(0)
+    excess["excess_return"] = excess["Strategy1"] - excess["ret"]
+    ### cumulated return is the sum of the mean returns per day
+    cumulated_returns = data[data["Strategy1"] != 0].groupby(['Date'])[
+        "Strategy1"].mean().sum()
+
+    ### excess return is the sum of the daily excess returns in comparison to SP500
+    excess_return = excess["excess_return"].sum()
+
+    ### the number of trades is the number of times the position was not equal to 0
+    number_of_trades = data[data['Position_Strategy1'] != 0].count()[0]
+
+    ### number of wins/losses is the nr. of times the strategy had pos./neg. returns for a single trade
+    number_of_wins = data[data['Strategy1'] > 0].count()[0]
+    number_of_losses = data[data['Strategy1'] < 0].count()[0]
+
+    ### days with pos. / neg. returns are the days where the mean return was bigger/smaller 0
+    days_positive = sum(data[data["Strategy1"] != 0].groupby(['Date'])[
+                            "Strategy1"].mean() > 0)
+    days_negative = sum(data[data["Strategy1"] != 0].groupby(['Date'])[
+                            "Strategy1"].mean() < 0)
+
+    facts = {'Cumulated Returns': cumulated_returns, 'Number of trades': number_of_trades,
+             "Excess Returns": excess_return,
+             'Number of wins': number_of_wins, 'Number of losses': number_of_losses,
+             'Number of days with pos. Returns': days_positive,
+             'Number of days with neg. Returns': days_negative}
+    facts = pd.DataFrame.from_dict(facts, orient='index')
+    facts = facts.reset_index()
+    facts = facts.rename(columns={'index': 'Statistic', 0: 'Value'})
+    print(facts)
+
+def more_facts(data):
+    ### this dataframe shows how often each company was traded by the strategy
+    print(data[data['Position_Strategy1'] != 0][
+        'coin'].value_counts())
 
 
 
@@ -185,3 +226,5 @@ coin_portfolio(backtesting)
 coins_portfolio_long(backtesting)
 bitcoin = crypto_index('BTC-USD')
 comparison(backtesting, bitcoin)
+facts(backtesting)
+more_facts(backtesting)

@@ -4,8 +4,9 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from Dataset.Data_download import urls_to_df_from_url
 import matplotlib.pyplot as plt
+from sklearn import preprocessing as prep
+from sklearn.svm import SVC
 
 
 def pred(data, variables):
@@ -25,6 +26,25 @@ def pred(data, variables):
     print(confusion_matrix(backtesting_data["return"], prediction_backtest))
     return backtesting_prediction
 
+def pred_svm(data, variables):
+    model_data = data[data.start < "2019-10-01"]
+    backtesting_data = data[data.start >= "2019-10-01"]
+    train_y = model_data.filter(['return']).to_numpy()
+    train_X = model_data[variables].to_numpy()
+    train_y = prep.normalize(train_y, norm='l2')
+    train_X = prep.normalize(train_X, norm='l2')
+    print(model_data['return'].value_counts())
+    model = SVC(kernel='rbf')
+    model = model.fit(train_X, train_y)
+    prediction_backtest = model.predict(backtesting_data[variables])
+    # add the predictions to the original data and keep predictions, date & RP_ENTITY_ID as columns
+    backtesting_data['Prediction_News'] = prediction_backtest
+    backtesting_prediction = backtesting_data[
+        ['start', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average']]
+    print(accuracy_score(backtesting_data["return"], prediction_backtest))
+    backtesting_prediction.Prediction_News.value_counts()
+    print(confusion_matrix(backtesting_data["return"], prediction_backtest))
+    return backtesting_prediction
 
 def sma(stock_data):
     for coin in stock_data.coin.unique():
@@ -81,7 +101,7 @@ def results(data):
 
 
 
-sentiment_df = pd.read_csv('reddit.csv')
+sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
 predictions = pred(sentiment_df, ['score', 'average', 'ret'])
 sma(predictions)
 sentiment_strategy(predictions)

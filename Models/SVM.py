@@ -24,5 +24,5 @@ def svm(data):
 
 
 
-sentiment_df = pd.read_csv()
+sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
 svm(sentiment_df)

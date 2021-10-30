@@ -54,5 +54,5 @@ def random_forest(df):
 
 
 
-sentiment_df = pd.read_csv()
+sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
 random_forest(sentiment_df)
