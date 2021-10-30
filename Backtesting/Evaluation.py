@@ -82,7 +82,7 @@ def coin_portfolio(data):
     #Evaluation of the news Stratygy
 
     mean_return_per_day = data[data['Strategy1'] != 0].groupby([
-        'start'])['Strategy1'].mean().reset_index()['Strategy1']
+        'Date'])['Strategy1'].mean().reset_index()['Strategy1']
 
     # since there may be days where the algorithm decides not to trade at all,
     # the zero returns of the days without trading are added to the means per day.
@@ -98,8 +98,8 @@ def coin_portfolio(data):
     print(f"The mean return per day is: {returns}, the risk is: {risk} and the sharpe ratio is: {sharpe_ratio}")
 
 def coins_portfolio_long(data):
-    returns_market = data.groupby(['start'])['ret'].mean().mean()
-    risk_market = data.groupby(['start'])['ret'].mean().std(ddof=0)
+    returns_market = data.groupby(['Date'])['ret'].mean().mean()
+    risk_market = data.groupby(['Date'])['ret'].mean().std(ddof=0)
     sharpe_ratio_market = (returns_market / risk_market)
 
     print(
@@ -119,10 +119,6 @@ def crypto_index(ticker):
 
 def comparison(data, comparable):
     # calculate the excess return in comparison to sp500 per day
-    data.rename(columns = {'start':'Date'}, inplace=True)
-    time = lambda x: x + datetime.timedelta(hours=-8)
-    data.Date = pd.to_datetime(data.Date)
-    data.Date = data.Date.apply(time)
     strategy1_return = data[data["Strategy1"] != 0].groupby('Date')[
         'Strategy1'].mean()
     strategy1_return = pd.DataFrame(strategy1_return).reset_index()

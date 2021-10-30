@@ -1,6 +1,5 @@
 
 from sklearn.linear_model import LogisticRegression
-from Dataset.Data_download import urls_to_df_from_url
 import pandas as pd
 import statsmodels.api as sm
 import numpy as np
@@ -13,15 +12,15 @@ def log_reg(df):
     # check for distribution of target variable:
     print(sentiment_reddit_df.ret_1.value_counts() / len(sentiment_reddit_df.ret_1))
     # make train- test split based on date, not random
-    model_data = df[df.start < "2019-10-01"]
-    backtesting_data = df[df.start >= "2019-10-01"]
+    model_data = df[df.Date < "2019-10-01"]
+    backtesting_data = df[df.Date >= "2019-10-01"]
 
     print(model_data.coin.value_counts())
     # Split the data into explanatory and dependable variables for test and train datasets
-    X = model_data[['average', 'ret']]
+    X = model_data[['average', 'ret', 'google_trend']]
     y = model_data['return']
 
-    X_test = backtesting_data[['average', 'ret']]
+    X_test = backtesting_data[['average', 'ret', 'google_trend']]
     y_test = backtesting_data['return']
     regr = LogisticRegression()
 
@@ -38,10 +37,7 @@ def log_reg(df):
     print(result.summary())
 
 
-
-
-
-sentiment_reddit_df = pd.read_csv('reddit.csv')
-sentiment_telegram = pd.read_csv('telegram.csv')
-print(sentiment_reddit_df.describe())
-log_reg(sentiment_reddit_df)
+sentiment_telegram = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/telegram.csv')
+merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
+print(merged.info())
+log_reg(merged)

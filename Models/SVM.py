@@ -2,15 +2,15 @@ import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn import preprocessing as prep
-from Dataset.Data_download import urls_to_df_from_url
+
 
 def svm(data):
-    train = data[data.start < "2019-10-01"]
-    test = data[data.start >= "2019-10-01"]
+    train = data[data.Date < "2019-10-01"]
+    test = data[data.Date >= "2019-10-01"]
     train_x = train.filter(['return']).to_numpy()
     test_x = test.filter(['return']).to_numpy()
-    train_y = train[['average', 'score', 'ret']].to_numpy()
-    test_y = test[['average', 'score', 'ret']].to_numpy()
+    train_y = train[['average', 'score', 'ret', 'google_trend']].to_numpy()
+    test_y = test[['average', 'score', 'ret', 'google_trend']].to_numpy()
     train_y = prep.normalize(train_y, norm='l2')
     test_y = prep.normalize(test_y, norm='l2')
     test_x = prep.normalize(test_x, norm='l2')
@@ -24,5 +24,5 @@ def svm(data):
 
 
 
-sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
-svm(sentiment_df)
+merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
+svm(merged)

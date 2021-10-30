@@ -3,7 +3,6 @@ from sklearn. tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 import matplotlib.pyplot as plt
-from Dataset.Data_download import urls_to_df_from_url
 
 
 
@@ -13,14 +12,14 @@ def random_forest(df):
     # check for distribution of target variable:
     print(df.ret_1.value_counts() / len(df.ret_1))
     # make train- test split based on date, not random
-    model_data = df[df.start < "2019-10-01"]
-    backtesting_data = df[df.start >= "2019-10-01"]
-    variables = ['average', 'score', 'ret']
+    model_data = df[df.Date < "2019-10-01"]
+    backtesting_data = df[df.Date >= "2019-10-01"]
+    variables = ['average', 'score', 'ret', 'google_trend']
     # Split the data into explanatory and dependable variables for test and train datasets
-    X = model_data[['average', 'score', 'ret']]
+    X = model_data[['average', 'score', 'ret', 'google_trend']]
     y = model_data['return']
 
-    X_test = backtesting_data[['average', 'score', 'ret']]
+    X_test = backtesting_data[['average', 'score', 'ret', 'google_trend']]
     y_test = backtesting_data['return']
     '''
     n_estimators = [5, 10, 50, 100, 250]
@@ -29,7 +28,7 @@ def random_forest(df):
 
     max_score = 0
     params = []
-
+    print('parameter tuning')
     for n_e in n_estimators:
         for max_d in max_depth:
             for min_s in min_samples_split:
@@ -43,6 +42,7 @@ def random_forest(df):
                     print(score)
 
     print(params)
+    print('parameter tuning finished')
     '''
     model = RandomForestClassifier(max_depth=4, n_estimators=50, min_samples_split=7, random_state=4321)
     model = model.fit(X, y)
@@ -54,5 +54,5 @@ def random_forest(df):
 
 
 
-sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
-random_forest(sentiment_df)
+merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
+random_forest(merged)

@@ -38,6 +38,10 @@ def git_download(path, name):
     df.negative.fillna(method='ffill', inplace=True)
 
     df.reset_index(inplace = True)
+    df.rename(columns={'start': 'Date'}, inplace=True)
+    time = lambda x: x + datetime.timedelta(hours=-8)
+    df.Date = pd.to_datetime(df.Date)
+    df.Date = df.Date.apply(time)
     return df
 
 
