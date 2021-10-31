@@ -55,13 +55,16 @@ def sentiment_strategy():
     for i in range(0, len(backtesting['coin'].unique())):
         coin = backtesting['coin'].unique()[i]
         performance["coin"] = np.append(performance["coin"], coin)
+        '''
         cumulated_return = (backtesting.loc[(backtesting['coin'] == coin) & (backtesting[
                                                                                      'Strategy1'] != 0),
                                             'Strategy1'].mean() * len(backtesting[(backtesting[
                                                                                        'coin'] == coin) & (
                                                                                           backtesting[
                                                                                               'Strategy1'] != 0)]))
-
+'''
+        cumulated_return = backtesting.loc[(backtesting['coin'] == coin), 'Strategy1'].cumsum(
+        ).apply(np.exp).iloc[-1] - 1
         performance["Cumulated_Return"] = np.append(performance["Cumulated_Return"], cumulated_return)
 
         annualized_risk = (backtesting.loc[(backtesting['coin'] == coin) & (backtesting[
@@ -88,7 +91,7 @@ def coin_portfolio(data):
     # the zero returns of the days without trading are added to the means per day.
     # this way the mean return & volatility are comparable to the market
 
-    zeros = pd.DataFrame(np.repeat(0, (data['start'].nunique() - len(mean_return_per_day))))
+    zeros = pd.DataFrame(np.repeat(0, (data['Date'].nunique() - len(mean_return_per_day))))
     means = np.append(mean_return_per_day, zeros)
 
     returns = np.nanmean(means)
@@ -103,7 +106,7 @@ def coins_portfolio_long(data):
     sharpe_ratio_market = (returns_market / risk_market)
 
     print(
-        f"The mean return per day is: {returns_market}, the risk is: {risk_market} and the sharpe ratio is: {sharpe_ratio_market}")
+        f"The mean return for holding all coins per day is: {returns_market}, the risk is: {risk_market} and the sharpe ratio is: {sharpe_ratio_market}")
 
 def crypto_index(ticker):
     #^ CIX10
@@ -122,27 +125,35 @@ def comparison(data, comparable):
     strategy1_return = data[data["Strategy1"] != 0].groupby('Date')[
         'Strategy1'].mean()
     strategy1_return = pd.DataFrame(strategy1_return).reset_index()
+    strategy1_return.Date = pd.to_datetime(strategy1_return.Date)
     excess = strategy1_return.merge(comparable[["Date", "ret"]], on='Date', how="right")
     excess = excess.fillna(0)
     excess["excess_return"] = excess["Strategy1"] - excess["ret"]
     dict1 = {'Cum_Ret_Strategy': data[data["Strategy1"] != 0].groupby(
-        ['Date'])["Strategy1"].mean().cumsum()}
-    dict2 = {'Date': comparable.Date, 'Cum_Ret_SP500': comparable["ret"].cumsum()}
-    dict3 = {'Cum_Ret_SMA': data.groupby(['Date'])['StrategySMA'].mean().cumsum()}
-    dict4 = {'Date': excess.Date, 'Cum_Ret_Excess': excess["excess_return"].cumsum()}
-    dict5 = {'Cum_Ret_BuyAll': data.groupby(['Date'])['ret'].mean().cumsum()}
-
+        ['Date'])["Strategy1"].mean()}
+    dict2 = {'Date': comparable.Date, 'Cum_Ret_SP500': comparable["ret"]}
+    dict3 = {'Cum_Ret_SMA': data.groupby(['Date'])['StrategySMA'].mean()}
+    dict4 = {'Date': excess.Date, 'Cum_Ret_Excess': excess["excess_return"]}
+    dict5 = {'Cum_Ret_BuyAll': data.groupby(['Date'])['ret'].mean()}
 
     df1 = pd.DataFrame.from_dict(dict1).reset_index()
+    df1.Date = pd.to_datetime(df1.Date)
     df2 = pd.DataFrame.from_dict(dict2)
     df3 = pd.DataFrame.from_dict(dict3).reset_index()
+    df3.Date = pd.to_datetime(df3.Date)
     df4 = pd.DataFrame.from_dict(dict4)
     df5 = pd.DataFrame.from_dict(dict5).reset_index()
+    df5.Date = pd.to_datetime(df5.Date)
 
     plot_data = df2.merge(df1, on='Date', how='left')
     plot_data =  plot_data.merge(df3, on='Date').merge(df4, on='Date', how='left').merge(
         df5, on="Date", how='left')
     plot_data["Excess_News_to_Market"] = plot_data["Cum_Ret_Strategy"] - plot_data["Cum_Ret_BuyAll"]
+    plot_data['Cum_Ret_SP500'] = plot_data['Cum_Ret_SP500']/100
+    plot_data.set_index('Date', inplace = True)
+    plot_data[['Cum_Ret_SP500', 'Cum_Ret_Strategy', 'Cum_Ret_SMA', 'Cum_Ret_BuyAll']].dropna().cumsum(
+    ).apply(np.exp).plot(figsize=(10, 6))
+    '''
     # lot_data.loc[:, plot_data.columns != "Date"].divide(100).add(1)
     print(plot_data.head())
     fig = go.Figure()
@@ -164,6 +175,7 @@ def comparison(data, comparable):
                       plot_bgcolor='rgb(240,248,255)')
 
     fig.show()
+    '''
     plt.show()
 
 def facts(data):
@@ -172,6 +184,7 @@ def facts(data):
     strategy1_return = data[data["Strategy1"] != 0].groupby('Date')[
         'Strategy1'].mean()
     strategy1_return = pd.DataFrame(strategy1_return).reset_index()
+    strategy1_return.Date = pd.to_datetime(strategy1_return.Date)
     excess = strategy1_return.merge(bitcoin[["Date", "ret"]], on='Date', how="right")
     excess = excess.fillna(0)
     excess["excess_return"] = excess["Strategy1"] - excess["ret"]
@@ -220,7 +233,7 @@ long_coins()
 sentiment_strategy()
 coin_portfolio(backtesting)
 coins_portfolio_long(backtesting)
-bitcoin = crypto_index('BTC-USD')
+bitcoin = crypto_index('^GSPC')
 comparison(backtesting, bitcoin)
 facts(backtesting)
 more_facts(backtesting)

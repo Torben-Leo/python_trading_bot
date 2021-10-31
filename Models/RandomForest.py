@@ -8,18 +8,17 @@ import matplotlib.pyplot as plt
 
 
 
-def random_forest(df):
+def random_forest(df, variables):
     # check for distribution of target variable:
     print(df.ret_1.value_counts() / len(df.ret_1))
     # make train- test split based on date, not random
     model_data = df[df.Date < "2019-10-01"]
     backtesting_data = df[df.Date >= "2019-10-01"]
-    variables = ['average', 'score', 'ret', 'google_trend']
     # Split the data into explanatory and dependable variables for test and train datasets
-    X = model_data[['average', 'score', 'ret', 'google_trend']]
+    X = model_data[variables]
     y = model_data['return']
 
-    X_test = backtesting_data[['average', 'score', 'ret', 'google_trend']]
+    X_test = backtesting_data[variables]
     y_test = backtesting_data['return']
     '''
     n_estimators = [5, 10, 50, 100, 250]
@@ -53,6 +52,6 @@ def random_forest(df):
     plt.show()
 
 
-
+variables = ['average', 'ret', 'google_trend', 'score', 'momentum', '1', '2', '3', '4', 'vola']
 merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
-random_forest(merged)
+random_forest(merged, variables)

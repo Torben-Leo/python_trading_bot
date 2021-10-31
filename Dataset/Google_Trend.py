@@ -17,7 +17,7 @@ def download_googletrends(names, tickers):
         try:
             pytrends.build_payload([name], cat=0, timeframe='2019-01-01 2020-01-01', geo='', gprop='')
             data = pytrends.interest_over_time()
-            #data = getDailyData('Bitcoin', 2019)
+            #data = getDailyData(name, 2019)
             data = data.reset_index()
             data.rename(columns = {name:tickers[i]}, inplace = True)
             df = df.merge(data[['date', tickers[i]]], on = 'date' , how = 'left')
@@ -33,4 +33,3 @@ ticker = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash'
         'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
 df = download_googletrends(names, ticker)
 df_csv = df.to_csv('google_trends.csv')
-

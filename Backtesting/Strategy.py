@@ -10,8 +10,8 @@ from sklearn.svm import SVC
 
 
 def pred(data, variables):
-    model_data = data[data.start < "2019-10-01"]
-    backtesting_data = data[data.start >= "2019-10-01"]
+    model_data = data[data.Date < "2019-10-01"]
+    backtesting_data = data[data.Date >= "2019-10-01"]
     train_y = model_data.filter(['return'])
     train_X = model_data[variables]
     print(model_data['return'].value_counts())
@@ -20,15 +20,15 @@ def pred(data, variables):
     prediction_backtest = model.predict(backtesting_data[variables])
     # add the predictions to the original data and keep predictions, date & RP_ENTITY_ID as columns
     backtesting_data['Prediction_News'] = prediction_backtest
-    backtesting_prediction = backtesting_data[['start', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average']]
+    backtesting_prediction = backtesting_data[['Date', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average', 'google_trend']]
     print(accuracy_score(backtesting_data["return"], prediction_backtest))
     backtesting_prediction.Prediction_News.value_counts()
     print(confusion_matrix(backtesting_data["return"], prediction_backtest))
     return backtesting_prediction
 
 def pred_svm(data, variables):
-    model_data = data[data.start < "2019-10-01"]
-    backtesting_data = data[data.start >= "2019-10-01"]
+    model_data = data[data.Date < "2019-10-01"]
+    backtesting_data = data[data.Date >= "2019-10-01"]
     train_y = model_data.filter(['return']).to_numpy()
     train_X = model_data[variables].to_numpy()
     train_y = prep.normalize(train_y, norm='l2')
@@ -40,7 +40,7 @@ def pred_svm(data, variables):
     # add the predictions to the original data and keep predictions, date & RP_ENTITY_ID as columns
     backtesting_data['Prediction_News'] = prediction_backtest
     backtesting_prediction = backtesting_data[
-        ['start', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average']]
+        ['start', 'coin', 'Prediction_News', 'open', 'ret', 'ret_1', 'score', 'average', 'google_trend']]
     print(accuracy_score(backtesting_data["return"], prediction_backtest))
     backtesting_prediction.Prediction_News.value_counts()
     print(confusion_matrix(backtesting_data["return"], prediction_backtest))
@@ -101,8 +101,8 @@ def results(data):
 
 
 
-sentiment_df = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/reddit.csv')
-predictions = pred(sentiment_df, ['score', 'average', 'ret'])
+merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
+predictions = pred(merged, ['average', 'ret', 'google_trend', 'score', 'momentum', '1', '2', '3', '4', 'vola'])
 sma(predictions)
 sentiment_strategy(predictions)
 predictions.head()
