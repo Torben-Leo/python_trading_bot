@@ -60,11 +60,13 @@ def test_stationarity(timeseries, name):
         dfoutput['Critical Value (%s)' % key] = value
     print(dfoutput)
 
+urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+        'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
 tickers = ['BTC-USD']
 ''', 'ETH-USD', 'XRP-USD', 'ADA-USD','BNB-USD', 'HEX-USD', 'SOL1-USD','DOGE-USD']'''
-for ticker in tickers:
-    df = downlaod_tickers(ticker)
-    test_stationarity(df['Adj Close'], ticker)
-    test_stationarity(df['Return'], ticker)
+for url in urls:
+    df = downlaod_tickers(url.capitalize()+'-USD')
+    test_stationarity(df['Adj Close'], url)
+    test_stationarity(df['Return'], url)
 
 

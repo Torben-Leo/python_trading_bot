@@ -3,13 +3,16 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 from statsmodels.discrete.conditional_models import ConditionalLogit
+from sklearn.metrics import accuracy_score
 import warnings
 warnings.filterwarnings('ignore')
+import matplotlib.pyplot as plt
 
 def log_reg(df, variables):
     # check for distribution of target variable:
     print(df.ret_1.value_counts() / len(df.ret_1))
     # make train- test split based on date, not random
+    df = df[df['coin'] == 'gnt']
     model_data = df[df.Date < "2019-10-01"]
     backtesting_data = df[df.Date >= "2019-10-01"]
 
@@ -23,9 +26,14 @@ def log_reg(df, variables):
     regr = LogisticRegression()
 
     regr.fit(X, y)
-    y_pred = regr.predict(X_test)
-    print(pd.DataFrame([pd.DataFrame(y_pred).value_counts(), pd.DataFrame(y_test).value_counts()],
+    backtesting_data['prediction'] = regr.predict(X_test)
+    print(pd.DataFrame([pd.DataFrame(backtesting_data['prediction']).value_counts(), pd.DataFrame(y_test).value_counts()],
                        index=['Prediction', 'Y_test']).T)
+    print(accuracy_score(backtesting_data['prediction'], backtesting_data['return']))
+    backtesting_data['strategy'] = backtesting_data['prediction'] * backtesting_data['ret']
+    print((backtesting_data[['ret', 'strategy']]).sum().apply(np.exp))
+    backtesting_data[['ret', 'strategy']].cumsum().apply(np.exp).plot(figsize = (10, 6))
+    plt.show()
     logit_model = ConditionalLogit(y.to_numpy(), X.astype(float).to_numpy(), groups=model_data['coin'].to_numpy())
 
     # fit logit model into the data

@@ -31,7 +31,7 @@ def git_download(path, name):
     df['ret_1'] = df.ret.shift(-1)
     df.ret_1.fillna(0, inplace=True)
     # create decision variable 1 for positive return and 0 for negative returns of the next day
-    df['return'] = (df['ret_1'] > 0).astype(int)
+    df['return'] = np.sign(df['ret_1'])
     df['vola'] = (df.ret.rolling(window=30).std())*(30)**1/2
     df.average.fillna(method='ffill', inplace=True)
     df.positive.fillna(method='ffill', inplace=True)
@@ -56,7 +56,7 @@ def urls_to_df_from_url(urls, platform):
     df = pd.concat(content, sort=False)
     return df
 
-urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+urls = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
         'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
 urls_telegram = ['ada', 'algo', 'atom', 'dnt', 'eos','knc', 'loom', 'mana', 'trx', 'xem', 'xrp', 'xtz']
 df_reddit = urls_to_df_from_url(urls, 'reddit')
