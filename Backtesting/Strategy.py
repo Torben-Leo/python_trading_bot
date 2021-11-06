@@ -46,6 +46,7 @@ def pred_svm(data, variables):
     print(confusion_matrix(backtesting_data["return"], prediction_backtest))
     return backtesting_prediction
 
+# method to calculate moving average strategy and position
 def sma(stock_data):
     for coin in stock_data.coin.unique():
         ### for every ticker SMA21 & SMA252 are calculated
@@ -65,7 +66,7 @@ def sma(stock_data):
              .loc[stock_data['coin'] == coin, 'ret'])
     stock_data = stock_data[stock_data.SMA30.notna()]
 
-
+# method to calculate the strategy based on the sentiment score
 def sentiment_strategy(data):
     data['Prediction_News'] = data['Prediction_News'].fillna(0)
     ### position is long if there was a positive prediction, zero otherwise
@@ -102,7 +103,8 @@ def results(data):
 
 
 merged = pd.read_csv('/Users/torbenleowald/Documents/Python Finance/python_trading_bot/Dataset/merged.csv')
-predictions = pred(merged, ['average', 'ret', 'google_trend', 'score', 'momentum', '1', '2', '3', '4', 'vola'])
+#predictions = pred(merged, ['average', 'ret', 'google_trend', 'score', 'momentum', '1', '2', '3', '4', 'vola'])
+predictions = pred(merged, ['ret', 'score',  'google_trend_change', 'volumeUSD', 'vola', 'ret_google_trend', 'vola_score'])
 sma(predictions)
 sentiment_strategy(predictions)
 predictions.head()

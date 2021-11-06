@@ -9,6 +9,10 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 
 
+''' This class implements the evaluation of the different stragies and plots the result as cummulative returns when it 
+is executed
+'''
+
 def long_coins():
     ### for the ids in the small dataset the returns of strategy1 are calculated and compared to the market
 
@@ -25,7 +29,7 @@ def long_coins():
         coin = backtesting['coin'].unique()[i]
         performance_market["coin"] = np.append(performance_market["coin"], coin)
 
-        ### calculating the sum of the returns (hier könnte man auch einfach die Summe nehmen)
+        ### calculating the sum of the returns
         cumulated_return = (backtesting.loc[backtesting['coin'] == coin, 'ret'].mean() *
                             len(backtesting[backtesting['coin'] == coin]))
 
@@ -55,14 +59,6 @@ def sentiment_strategy():
     for i in range(0, len(backtesting['coin'].unique())):
         coin = backtesting['coin'].unique()[i]
         performance["coin"] = np.append(performance["coin"], coin)
-        '''
-        cumulated_return = (backtesting.loc[(backtesting['coin'] == coin) & (backtesting[
-                                                                                     'Strategy1'] != 0),
-                                            'Strategy1'].mean() * len(backtesting[(backtesting[
-                                                                                       'coin'] == coin) & (
-                                                                                          backtesting[
-                                                                                              'Strategy1'] != 0)]))
-'''
         cumulated_return = backtesting.loc[(backtesting['coin'] == coin), 'Strategy1'].cumsum(
         ).apply(np.exp).iloc[-1] - 1
         performance["Cumulated_Return"] = np.append(performance["Cumulated_Return"], cumulated_return)
@@ -82,7 +78,7 @@ def sentiment_strategy():
 
 
 def coin_portfolio(data):
-    #Evaluation of the news Stratygy
+    #Evaluation of the Sentiment Stratygy
 
     mean_return_per_day = data[data['Strategy1'] != 0].groupby([
         'Date'])['Strategy1'].mean().reset_index()['Strategy1']
@@ -109,16 +105,15 @@ def coins_portfolio_long(data):
         f"The mean return for holding all coins per day is: {returns_market}, the risk is: {risk_market} and the sharpe ratio is: {sharpe_ratio_market}")
 
 def crypto_index(ticker):
-    #^ CIX10
     # for comparison also the results of the CIX100 index are calculated
-    CIX100 = yf.download(ticker, start="2019-10-01", end="2020-01-01")
-    CIX100 = CIX100.reset_index()
-    CIX100['ret'] = (((CIX100['Adj Close'] / CIX100['Adj Close'].shift(1)) - 1) * 100)
-    CIX100_return = CIX100['ret'].mean()
-    CIX100_volatility = CIX100['ret'].std(ddof=0)
-    CIX100_sharpe_ratio = CIX100_return / CIX100_volatility
-    print(CIX100_return, CIX100_volatility, CIX100_sharpe_ratio)
-    return CIX100
+    comparable = yf.download(ticker, start="2019-10-01", end="2020-01-01")
+    comparable = comparable.reset_index()
+    comparable['ret'] = (((comparable['Adj Close'] / comparable['Adj Close'].shift(1)) - 1) * 100)
+    comparable_return = comparable['ret'].mean()
+    comparable_volatility = comparable['ret'].std(ddof=0)
+    comparable_sharpe_ratio = comparable_return / comparable_volatility
+    print(comparable_return, comparable_volatility, comparable_sharpe_ratio)
+    return comparable
 
 def comparison(data, comparable):
     # calculate the excess return in comparison to sp500 per day
@@ -148,21 +143,30 @@ def comparison(data, comparable):
     plot_data = df2.merge(df1, on='Date', how='left')
     plot_data =  plot_data.merge(df3, on='Date').merge(df4, on='Date', how='left').merge(
         df5, on="Date", how='left')
-    plot_data["Excess_News_to_Market"] = plot_data["Cum_Ret_Strategy"] - plot_data["Cum_Ret_BuyAll"]
+    plot_data["Excess_News_to_Market"] = plot_data["Cum_Ret_Strategy"] - plot_data["Cum_Ret_BuyAll"] + 1
     plot_data['Cum_Ret_SP500'] = plot_data['Cum_Ret_SP500']/100
     plot_data.set_index('Date', inplace = True)
     plot_data[['Cum_Ret_SP500', 'Cum_Ret_Strategy', 'Cum_Ret_SMA', 'Cum_Ret_BuyAll']].dropna().cumsum(
     ).apply(np.exp).plot(figsize=(10, 6))
-    '''
+    plot_data['Cum_Ret_SP500'] = plot_data['Cum_Ret_SP500'].dropna().cumsum(
+    ).apply(np.exp)
+    plot_data['Cum_Ret_Strategy'] = plot_data['Cum_Ret_Strategy'].dropna().cumsum(
+    ).apply(np.exp)
+    plot_data['Cum_Ret_SMA'] = plot_data['Cum_Ret_SMA'].dropna().cumsum(
+    ).apply(np.exp)
+    plot_data['Cum_Ret_BuyAll'] = plot_data['Cum_Ret_BuyAll'].dropna().cumsum(
+    ).apply(np.exp)
+    plot_data.reset_index(inplace = True)
+
     # lot_data.loc[:, plot_data.columns != "Date"].divide(100).add(1)
     print(plot_data.head())
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=plot_data.Date, y=plot_data.Cum_Ret_SP500, name="SP500",
+    fig.add_trace(go.Scatter(x=plot_data.Date, y=plot_data.Cum_Ret_SP500, name="Bitcoin",
                              line=dict(color='black', width=2)))
     fig.add_trace(go.Scatter(x=plot_data.Date, y=plot_data.Cum_Ret_Strategy, name="Algorithm Strategy",
                              mode='lines', line=dict(color='blue', width=2)))
     fig.add_trace(
-        go.Scatter(x=plot_data.Date, y=plot_data.Cum_Ret_Excess, mode='lines', name="Excess Return", line=dict(
+        go.Scatter(x=plot_data.Date, y=plot_data.Excess_News_to_Market, mode='lines', name="Excess Return", line=dict(
             color='lightblue', width=2)))
     fig.add_trace(go.Scatter(x=plot_data.Date, y=plot_data.Cum_Ret_SMA, name='SMA-Strategy', mode='lines',
                              line=dict(color='pink', width=2)))
@@ -175,7 +179,7 @@ def comparison(data, comparable):
                       plot_bgcolor='rgb(240,248,255)')
 
     fig.show()
-    '''
+
     plt.show()
 
 def facts(data):
@@ -219,7 +223,7 @@ def facts(data):
     print(facts)
 
 def more_facts(data):
-    ### this dataframe shows how often each company was traded by the strategy
+    ### this dataframe shows how often each coin was traded by the strategy
     print(data[data['Position_Strategy1'] != 0][
         'coin'].value_counts())
 

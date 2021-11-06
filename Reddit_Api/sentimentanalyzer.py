@@ -11,6 +11,7 @@ import seaborn as sns
 #nltk.download('vader_lexicon')
 sns.set(style='darkgrid', context='talk', palette='Dark2')
 
+# Additional classes for streaming and sentiment analysis not finished -> for future improvements
 
 class SentimentAnalyser:
 

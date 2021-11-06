@@ -8,12 +8,10 @@ from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.stattools import adfuller
 
 def downlaod_tickers(ticker):
-    start = dt.datetime(2017, 6,1)
-    end = dt.datetime.now()
     df = yf.download(ticker, period='max', threads=True)
     plt.figure(figsize=(20, 10))
     df['Adj Close'].plot()
-    plt.ylabel("Daily prices of Bitcoin in USD")
+    plt.ylabel("Daily prices of" + ticker + " in USD")
     plt.show()
     df['Return'] = df['Adj Close'].pct_change()
     df = df[1:]

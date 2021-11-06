@@ -21,7 +21,7 @@ def prediction(data, ticker):
     prophet_basic.fit(train_dataset)
     # create a dataframe with ds (i.e., datetime stamp) that has the time series of dates we need for prediction
     # periods specify the number of days to extend into the future
-    future = prophet_basic.make_future_dataframe(periods=90)
+    future = prophet_basic.make_future_dataframe(periods=100)
     #future.tail()
     # forecast BTC prices
     forecast = prophet_basic.predict(future)
@@ -49,13 +49,16 @@ def prediction(data, ticker):
 
 
 #tickers = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'ADA-USD','BNB-USD', 'HEX-USD','DOGE-USD']
-tickers = ['ada', 'algo', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
+tickers = ['ada', 'atom','bat', 'bch', 'bnb', 'btc', 'cvc', 'dai', 'dash', 'dnt', 'doge', 'eos', 'gnt', 'knc',
         'link', 'loom', 'ltc', 'mana', 'mkr', 'neo', 'rep', 'trx', 'xem', 'xlm', 'xrp', 'xtz', 'zec', 'zrx']
-merged = pd.DataFrame()
+timeseries = pd.DataFrame()
 for ticker in tickers:
     df = download_ticker(ticker.capitalize() + '-USD')
     if df.size > 5:
         forecast = prediction(df, ticker)
-        merged = merged.append(forecast[forecast.ds > dt.datetime(2019, 10, 1)])
+        forecast['coin'] = ticker
+        timeseries = timeseries.append(forecast[forecast.ds > dt.datetime(2019, 9, 29)][['ds', 'coin', 'yhat']])
+        timeseries['yhat'] = (timeseries['yhat']> 0).astype(int)
 
-merged.info()
+timeseries.info()
+timeseries.to_csv('timeseries.csv')

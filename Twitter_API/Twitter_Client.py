@@ -6,7 +6,7 @@ from tweepy import OAuthHandler
 from textblob import TextBlob
 from pycaret.classification import *
 
-# Todo Should sentimnet scores be weighted based on number of followers?
+# # Additional classes for streaming and sentiment analysis not finished -> for future improvements
 class TwitterClient:
 
     def __init__(self, consumer_key, consumer_secret, access_token_key, access_token_secret):

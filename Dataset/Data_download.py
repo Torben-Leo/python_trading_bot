@@ -7,38 +7,41 @@ pd.options.display.width= None
 pd.options.display.max_columns= None
 pd.set_option('display.max_rows', 3000)
 pd.set_option('display.max_columns', 3000)
-
-# todo: Data cleaning, delete cc's without values in the sentiment columns, build first regression models,
-# is sentimenet score allone enough as predictor variable
-
-
-# datetime.datetime.fromtimestamp(ms/1000.0)
+'''
+In this python file the Sentiment Dataset is downloaded and the different columns prepared
+'''
 
 def git_download(path, name):
     # change millisecond timestamp to dateobject
     f = lambda ms: datetime.datetime.fromtimestamp(int(ms) / 1000.0)
     df = pd.read_csv(path, index_col=1, date_parser=f)
-    #check number of nan values in the sentiment score column
+    # check number of nan values in the sentiment score column, if the column has more than 100 nan values we do not
+    # include the coin since the amount of data is too little for the later regression steps
     if df.score.isnull().sum() > 100:
         return
     # handle nan data
     else:
+        # nan values in the sentiment column are filled with the values of the day before since we assume the sentiment
+        # has most likely stayed constant or its true value is at least similar to the one of the day before
         df.score.fillna(method = 'ffill', inplace=True)
     df['coin'] = name
     # calculate return per day
     df['ret'] = df.close.pct_change()
     df.ret.fillna(0, inplace=True)
+    #df.ret = df.ret.clip(lower=df.ret.quantile(0.005), upper=df.ret.quantile(0.995))
     df['ret_1'] = df.ret.shift(-1)
     df.ret_1.fillna(0, inplace=True)
     # create decision variable 1 for positive return and 0 for negative returns of the next day
     df['return'] = np.sign(df['ret_1'])
     df['vola'] = (df.ret.rolling(window=30).std())*(30)**1/2
+    # same reasoning for ffill as for the sentiment column
     df.average.fillna(method='ffill', inplace=True)
     df.positive.fillna(method='ffill', inplace=True)
     df.negative.fillna(method='ffill', inplace=True)
 
     df.reset_index(inplace = True)
     df.rename(columns={'start': 'Date'}, inplace=True)
+    # change the datetime object from 8 in the morning to midnight to enable merging at a later stage
     time = lambda x: x + datetime.timedelta(hours=-8)
     df.Date = pd.to_datetime(df.Date)
     df.Date = df.Date.apply(time)

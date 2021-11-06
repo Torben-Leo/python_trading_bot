@@ -2,6 +2,9 @@ from IPython import display
 import praw
 from datetime import datetime
 
+
+# Additional classes for streaming and sentiment analysis not finished -> for future improvements
+
 class RedditClient:
     # TODO does set automatically prevent duplicates in the headline set?
     def __init__(self, client_id, client_secret, user_agent):

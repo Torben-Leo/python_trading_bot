@@ -2,7 +2,7 @@ import yfinance as yf
 import datetime as dt
 
 
-
+# helper file to download conveniently from yahoo finance
 
 
 
